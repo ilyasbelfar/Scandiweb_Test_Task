@@ -31,6 +31,13 @@ const ProductsList = () => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      setProducts([]);
+      setSelectedProducts([]);
+    };
+  }, []);
+
   const handleMassDelete = async () => {
     if (selectedProducts?.length === 0) return;
     try {
