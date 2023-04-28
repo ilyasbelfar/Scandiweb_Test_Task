@@ -16,6 +16,7 @@ const AddProduct = () => {
   const [requestError, setRequestError] = useState(null);
 
   const handleSubmit = async (event) => {
+    setRequestError(null);
     event.preventDefault();
 
     const { sku, name, price, productType } = formData;
@@ -304,12 +305,29 @@ const AddProduct = () => {
           formData?.length > 0)) &&
       Object.keys(errors).length === 0
     ) {
+      const payloadData = { ...formData };
+      if (payloadData?.productType?.trim()?.toLowerCase() === "dvd") {
+        payloadData.attribute_value = payloadData?.size;
+        delete payloadData.size;
+      }
+      if (payloadData?.productType?.trim()?.toLowerCase() === "book") {
+        payloadData.attribute_value = payloadData?.weight;
+        delete payloadData.weight;
+      }
+      if (payloadData?.productType?.trim()?.toLowerCase() === "furniture") {
+        payloadData.attribute_value = `${payloadData?.height} x ${payloadData?.width} x ${payloadData?.length}`;
+        delete payloadData.height;
+        delete payloadData.width;
+        delete payloadData.length;
+      }
       try {
         const { data } = await axios.post(
           "/products/add",
-          JSON.stringify(formData)
+          JSON.stringify(payloadData)
         );
-        console.log(data);
+        setErrors({});
+        setRequestError(null);
+        setFormData({});
         if (data?.status === "success") {
           navigate("/");
         }
@@ -754,7 +772,7 @@ const AddProduct = () => {
           </div>
           <div className="row mb-3 g-3">
             <div className="col-sm-2 col-lg-1">
-              <label htmlFor="price" className="col-form-label">
+              <label htmlFor="productType" className="col-form-label">
                 Product Type
               </label>
             </div>
@@ -841,7 +859,7 @@ const AddProduct = () => {
               </div>
               <div className="row mb-3 g-3">
                 <div className="col-sm-2 col-lg-1">
-                  <label htmlFor="name" className="col-form-label">
+                  <label htmlFor="size" className="col-form-label">
                     Size (MB)
                   </label>
                 </div>
@@ -1079,7 +1097,7 @@ const AddProduct = () => {
               </div>
               <div className="row mb-3 g-3">
                 <div className="col-sm-2 col-lg-1">
-                  <label htmlFor="name" className="col-form-label">
+                  <label htmlFor="weight" className="col-form-label">
                     Weight (KG)
                   </label>
                 </div>
@@ -1317,7 +1335,7 @@ const AddProduct = () => {
               </div>
               <div className="row mb-3 g-3">
                 <div className="col-sm-2 col-lg-1">
-                  <label htmlFor="name" className="col-form-label">
+                  <label htmlFor="height" className="col-form-label">
                     Height (CM)
                   </label>
                 </div>
@@ -1548,7 +1566,7 @@ const AddProduct = () => {
               </div>
               <div className="row mb-3 g-3">
                 <div className="col-sm-2 col-lg-1">
-                  <label htmlFor="name" className="col-form-label">
+                  <label htmlFor="width" className="col-form-label">
                     Width (CM)
                   </label>
                 </div>
@@ -1779,7 +1797,7 @@ const AddProduct = () => {
               </div>
               <div className="row mb-3 g-3">
                 <div className="col-sm-2 col-lg-1">
-                  <label htmlFor="name" className="col-form-label">
+                  <label htmlFor="length" className="col-form-label">
                     Length (CM)
                   </label>
                 </div>

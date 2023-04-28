@@ -105,7 +105,7 @@ const ProductsList = () => {
         >
           {!isLoading &&
             products?.length > 0 &&
-            products.map((product) => (
+            products?.map((product) => (
               <div
                 key={product?.id}
                 className="col-6 col-md-3 text-center card p-4"
