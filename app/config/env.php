@@ -2,7 +2,7 @@
 
     //App config
     define("APPROOT", dirname(dirname(__DIR__)));
-    define("URLROOT", "http://localhost/ScandiwebMvc");
+    define("URLROOT", "http://localhost/Scandiweb_Test_Task");
     define("SITENAME", "Scandiweb Test Task");
     define("AUTHOR", "Ilyas Belfar");
 
