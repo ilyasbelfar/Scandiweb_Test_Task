@@ -44,19 +44,40 @@ class ProductController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $productBody = json_decode(file_get_contents('php://input'));
+            if (
+                !isset($productBody->sku) || $productBody->sku == "" ||
+                !isset($productBody->name) || $productBody->name == "" ||
+                !isset($productBody->price) || $productBody->price == "" ||
+                !isset($productBody->productType) || $productBody->productType == "" ||
+                !isset($productBody->attribute_value) || $productBody->attribute_value == ""
+            ) {
+                echo json_encode(["status" => "error", "message" => "Some required fields are missing!"]);
+                header("HTTP/1.1 400 Bad Request");
+                die();
+            }
+            if (!is_numeric($productBody->price)) {
+                echo json_encode(["status" => "error", "message" => "Price must be a number!"]);
+                header("HTTP/1.1 400 Bad Request");
+                die();
+            }
+            if ($productBody->price < 0) {
+                echo json_encode(["status" => "error", "message" => "Price must be a positive number!"]);
+                header("HTTP/1.1 400 Bad Request");
+                die();
+            }
             if ($this->productModel->checkProductExists($productBody->sku)) {
                 echo json_encode(["status" => "error", "message" => "Product with SKU: " . $productBody->sku . " already exists, please use a different SKU."]);
                 header("HTTP/1.1 400 Bad Request");
                 die();
             } else {
-                if (strtolower($productBody->productType) == "book") {
-                    $product = new Book($productBody->sku, $productBody->name, $productBody->price, $productBody->weight);
-                } else if (strtolower($productBody->productType) == "dvd") {
-                    $product = new DVD($productBody->sku, $productBody->name, $productBody->price, $productBody->size);
-                } else if (strtolower($productBody->productType) == "furniture") {
-                    $dimensions = "$productBody->height x $productBody->width x $productBody->length";
-                    $product = new Furniture($productBody->sku, $productBody->name, $productBody->price, $dimensions);
-                    unset($dimensions);
+                $classname = $productBody->productType;
+                $class_path = dirname(__DIR__) . '/models/' . str_replace('\\', '/', $classname) . '.php';
+                unset($productBody->productType);
+                if (file_exists($class_path)) $product = new $classname($productBody->sku, $productBody->name, $productBody->price, $productBody->attribute_value);
+                else {
+                    echo json_encode(["status" => "error", "message" => "Product type not found, please use a valid product type."]);
+                    header("HTTP/1.1 404 Not Found");
+                    die();
                 }
                 unset($productBody);
                 if ($this->productModel->addProduct($product)) {
